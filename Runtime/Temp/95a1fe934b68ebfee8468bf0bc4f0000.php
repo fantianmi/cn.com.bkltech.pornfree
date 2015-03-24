@@ -3,15 +3,15 @@
                     <p><a href="http://www.ourstu.com/index.php?s=/home/index/about.html" target="_blank">关于我们</a>
                     <p>
                     <p><a href="http://tox.ourstu.com/tox/index.php?s=/Forum/Index/forum/id/3.html" target="_blank">问题反馈</a></p>
-                    <p><a href="http://www.ourstu.com/index.php?s=/home/index/contact.html" target="_blank">联系我们</a></p>";s:14:"FOOTER_SUMMARY";s:162:"嘉兴想天信息科技有限公司是一家专注于为客户提供专业的社交方案。公司秉持简洁、高效、创新，不断为客户创造奇迹。";s:12:"FOOTER_TITLE";s:89:"<a target="_blank" href="http://www.ourstu.com/">嘉兴想天信息科技有限公司</a>";s:12:"FOOTER_QCODE";s:45:" <img src="/Public/Core/images/erweima.png"/>";s:17:"_WEIBO_SHOW_TITLE";s:1:"1";s:16:"_WEIBO_SHOWTITLE";s:1:"0";s:18:"_FORUM_LIMIT_IMAGE";s:2:"10";s:18:"_ISSUE_NEED_VERIFY";s:1:"0";s:11:"_USER_LEVEL";s:185:"0:Lv1 戒客
-100:Lv2 戒侠
-400:Lv3 戒师
-1000:Lv4 戒尊
-1800:Lv5 戒宗
-2800:Lv6 戒王
-4000:Lv7 戒帝
-6500:Lv8 戒圣
-10000:Lv9 戒仙
-15000:Lv10 戒神
-20000:Lv11 涅槃";}
+                    <p><a href="http://www.ourstu.com/index.php?s=/home/index/contact.html" target="_blank">联系我们</a></p>";s:14:"FOOTER_SUMMARY";s:162:"嘉兴想天信息科技有限公司是一家专注于为客户提供专业的社交方案。公司秉持简洁、高效、创新，不断为客户创造奇迹。";s:12:"FOOTER_TITLE";s:89:"<a target="_blank" href="http://www.ourstu.com/">嘉兴想天信息科技有限公司</a>";s:12:"FOOTER_QCODE";s:45:" <img src="/Public/Core/images/erweima.png"/>";s:17:"_WEIBO_SHOW_TITLE";s:1:"1";s:16:"_WEIBO_SHOWTITLE";s:1:"0";s:18:"_FORUM_LIMIT_IMAGE";s:2:"10";s:18:"_ISSUE_NEED_VERIFY";s:1:"0";s:11:"_USER_LEVEL";s:176:"0:Lv1 戒客
+56:Lv2 戒侠
+112:Lv3 戒师
+240:Lv4 戒尊
+376:Lv5 戒宗
+536:Lv6 戒王
+736:Lv7 戒帝
+976:Lv8 戒圣
+1336:Lv9 戒仙
+1816:Lv10 戒神
+2336:Lv11 涅槃";}
 ?>

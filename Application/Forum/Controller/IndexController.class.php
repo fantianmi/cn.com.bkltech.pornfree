@@ -78,9 +78,9 @@ class IndexController extends Controller
         } else if ($order == 'reply') {
             $order = 'reply_count desc';
         }else if($order == 'click'){
-            $order = 'view_count desc';
+            $order = 'id desc';
         }else{
-            $order = 'last_reply_time desc';//默认的
+            $order = 'id desc';//默认的
         }
         if ($id == 0) {
             $map = array('status' => 1);
