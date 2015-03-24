@@ -8,7 +8,7 @@
 
 
 /**
- * 调试开关abbbbb
+ * 调试开关abbbbbaaadasdasdas
  * 项目正式部署后请设置为false
  */
 define ( 'APP_DEBUG', false );
