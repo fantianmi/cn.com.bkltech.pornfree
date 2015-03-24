@@ -524,19 +524,22 @@ class IndexController extends Controller
         $pagesize = I('pagesize',10);
         $uid      = I('uid');
         //$ranking  = S('ranking_'.$uid.'_'.$pagenum);
-        //if(!empty($ranking)) exit( $ranking );
+        if(!empty($ranking)) exit( $ranking );
         // if(empty($uid)) exit(err(100));
         // $field = array('uid','nickname','score');
         /*获取分组后的总记录数*/
         $sqlCount = "select count(*) c from (select count(*) from thinkox_check_info group by uid) a";
+        
         $re = M()->query($sqlCount);
         $totalCount = $re[0]['c'];
-
-        $userList = D('CheckInfo')->getConNum($pagenum,$pagesize);
-        foreach ($userList as &$v) {
-            $v['path']     = $this->getAvatar($v['uid']);
-            $v['nickname'] = $this->getNickname($v['uid']);
-        }
+        $start=($pagenum-1)*$pagesize;
+        $end=$pagenum*$pagesize;
+		$sql="select ci.*,a.path,m.nickname from thinkox_check_info ci left join thinkox_avatar a on ci.uid=a.uid left join thinkox_member m on ci.uid=m.uid limit ".$start.",".$end;
+        $userList = M()->query($sql);
+//        foreach ($userList as &$v) {
+//            $v['path']     = $this->getAvatar($v['uid']);
+//            $v['nickname'] = $this->getNickname($v['uid']);
+//        }
         $totalpage = ceil($totalCount/$pagesize);
         if($pagenum >= $totalpage){
             $hasNextPage = false;
@@ -555,7 +558,7 @@ class IndexController extends Controller
 
         );
         // 缓存数据
-        //S('ranking_'.$uid.'_'.$pagenum,$data,600);
+        S('ranking_'.$uid.'_'.$pagenum,$data,600);
         echo json_encode(array('msg'=>'success','ret'=>0,'data'=>$data));
     }
 
