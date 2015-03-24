@@ -3,7 +3,7 @@ $dirname = './Runtime/';
 
 //清文件缓存
 $dirs	=	array($dirname);
-
+//
 //清理缓存
 foreach($dirs as $value) {
 	rmdirr($value);
