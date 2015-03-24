@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <include file="Public/head"/>
+    <link type="text/css" rel="stylesheet" href="__CSS__/group.css"/>
+    <script type="text/javascript" src="__JS__/common.js"></script>
+</head>
+<body>
+<!-- 头部 -->
+<include file="Public/header"/>
+<!-- /头部 -->
+<include file="Public/nav"/>
+<!-- 主体 -->
+<div class="container clearfix">
+
+    <div class="common_block_border group_info">
+            <div class="group_tags group_types" style="padding: 15px;">
+                <a href="{:U('index')}" <if condition="!$group_cate">class="active"</if>>
+                <!--//TODO 添加标签的链接-->
+                全部
+                </a>
+                <volist name="groupType" id="type">
+                    <a href="{:U('groups',array('cate'=>$type['id']))}" <if condition="$group_cate eq $type['id']">class="active"</if>>
+                    <!--//TODO 添加标签的链接-->
+                    {$type.title|parseWeiboContent}
+                    </a>
+                </volist>
+            </div>
+
+<!--        <div class="pull-right text-right sort_btn" style="margin-right: 15px;margin-top: 15px;">
+            <div class="btn-group group_order">
+                <button type="button" class="btn btn-primary dropdown-toggle btn-md" data-toggle="dropdown">
+                    {$order}
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu text-left" role="menu">
+                    <li><a href="{:U('index',array('id'=>$group_id,'order'=>'ctime'))}">按最新创建排序</a>
+                    </li>
+                    <li><a href="{:U('index',array('id'=>$group_id,'order'=>'activity'))}">按活跃度排序</a>
+                    </li>
+                    <li><a href="{:U('index',array('id'=>$group_id,'order'=>'member'))}">按成员数排序</a>
+                    </li>
+                </ul>
+            </div>
+        </div>-->
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <div>
+
+
+                <div class="">
+                    <section class="group_lists">
+                        <if condition="!$group_list">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <p class="text-muted" style="text-align: center; font-size: 3em;">
+                                        <br/><br/>
+                                        暂时没有群组～
+                                        <br/><br/><br/>
+                                    </p>
+                                </div>
+                            </div>
+                        </if>
+                        <volist name="group_list" id="group">
+                            <include file="Public/group-item"/>
+                        </volist>
+
+
+                        <div class=" clearfix pull-right">
+                            {:getPagination($totalCount,$r)}
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- /主体 -->
+
+<!-- 底部 -->
+<include file="Public/footer"/>
+<!-- /底部 -->
+</body>
+</html>
+
+
+

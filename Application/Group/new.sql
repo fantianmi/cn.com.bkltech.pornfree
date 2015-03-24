@@ -1,0 +1,1 @@
+ALTER TABLE  `thinkox_group_post_category` ADD  `group_id` INT NOT NULL AFTER  `id`

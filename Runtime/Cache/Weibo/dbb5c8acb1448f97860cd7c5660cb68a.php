@@ -1,0 +1,1 @@
+<?php if (!defined('THINK_PATH')) exit();?>ThinkOX轻量化社交框架

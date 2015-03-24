@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<!--Declare page as mobile friendly --> 
+	<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0"/>
+	<!-- Declare page as iDevice WebApp friendly -->
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<title>{$data.title}</title>
+	<link href="__CSS__/style.css?v=1.0.7" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<!-- <h1>{$data.title}</h1> -->
+	<div class="content_info"><span class="info_ctime">{$data.create_time|time_format}戒客团队</span></div>
+	<if condition="$data.path">
+		<div>
+			<img width=100% src="__ROOT__{$data.path}" alt="">
+		</div>
+	</if>
+	<div class="content">
+		{$data.content}
+	</div>
+	<!-- <div class="page_select">
+		<div class="pre_content">
+			<if condition="$data['prev']['title']">
+				<a href="{:U('?id='.$data['prev']['id'])}">
+					上一篇 : {$data['prev']['title']}
+				</a>
+			<else/>
+				<a href="">
+					上一篇 : 没有上一篇了
+				</a>
+			</if>
+		</div>
+		<div class="next_content">
+			<if condition="$data['next']['title']">
+				<a href="{:U('?id='.$data['next']['id'])}">
+					下一篇 : {$data['next']['title']}
+				</a>
+			<else/>
+				<a href="">
+					下一篇 : 没有下一篇了
+				</a>
+			</if>
+		</div>
+	</div> -->
+</body>

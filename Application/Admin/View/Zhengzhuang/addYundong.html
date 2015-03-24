@@ -1,0 +1,73 @@
+<extend name="Public/base"/>
+
+<block name="body">
+    <!-- 标题栏 -->
+    <div class="main-title">
+        <h2>{$title}运动健身</h2>
+    </div>
+    <div class="cf">
+
+        <!-- 高级搜索 -->
+  <!--       <div class="search-form fr cf">
+      <div class="sleft">
+          <input type="text" name="nickname" class="search-input" value="{:I('nickname')}"
+                 placeholder="请输入用户昵称或者ID">
+          <a class="sch-btn" href="javascript:;" id="search" url="{:U('index')}"><i class="btn-search"></i></a>
+      </div>
+  </div> -->
+    </div>
+    <!-- 数据列表 -->
+    <form action="{:U()}" method="post" class="form-horizontal">
+	    <div class="form-item">
+			<label class="item-label">
+				运动名称<span class="check-tips">（名称不能为空）</span>
+			</label>
+			<div class="controls">
+				<input type="text" name="name" class="text input-large" value="{$info.name|default=''}">
+			</div>
+			<label class="item-label">
+				排序<span class="check-tips"></span>
+			</label>
+			<div class="controls">
+				<input type="text" name="sort" class="text input-large" value="{$info.sort|default=0}">
+			</div>
+		</div>
+		<div class="form-item">
+			<input type="hidden" name="id" value="{$info.id}">
+			<button type="submit" id="submit" class="btn submit-btn ajax-post" target-form="form-horizontal">确 定</button>
+			<button class="btn btn-return" onclick="javascript:history.back(-1);return false;">返 回</button>
+		</div>
+	</form>
+    <div class="page">
+        {$_page}
+    </div>
+</block>
+
+<block name="script">
+    <script src="__STATIC__/thinkbox/jquery.thinkbox.js"></script>
+
+    <script type="text/javascript">
+        //搜索功能
+        $("#search").click(function () {
+            var url = $(this).attr('url');
+            var query = $('.search-form').find('input').serialize();
+            query = query.replace(/(&|^)(\w*?\d*?\-*?_*?)*?=?((?=&)|(?=$))/g, '');
+            query = query.replace(/^&/g, '');
+            if (url.indexOf('?') > 0) {
+                url += '&' + query;
+            } else {
+                url += '?' + query;
+            }
+            window.location.href = url;
+        });
+        //回车搜索
+        $(".search-input").keyup(function (e) {
+            if (e.keyCode === 13) {
+                $("#search").click();
+                return false;
+            }
+        });
+        //导航高亮
+        highlight_subnav("{:U('User / index')}");
+    </script>
+</block>

@@ -1,0 +1,47 @@
+<extend name="Public/base" />
+<block name="body">
+    <div class="main-title">
+        <h2>{$nickname} 的症状</h2>
+    </div>
+    <div class="data-table table-striped">
+        <table class="">
+            <thead>
+            <tr>
+                <th class="">症状ID</th>
+                <th class="">症状名称</th>
+                <th class="">创建时间</th>
+                <th class="">打分次数</th>
+                <th class="">平均分</th>
+                <th class="">最高分</th>
+                <th class="">最低分</th>
+            </tr>
+            </thead>
+            <tbody>
+            <notempty name="list">
+                <volist name="list" id="val">
+                    <tr>
+                        <td>{$val.zid}</td>
+                        <td>{$val.name}</td>
+                        <td>{$val.create_time|time_format}</td>
+                        <td>{$val.scoreCount}</td>
+                        <td>{$val.scoreAvg}</td>
+                        <td>{$val.scoreFirst}</td>
+                        <td>{$val.scoreLast}</td>
+                    </tr>
+                </volist>
+            <else/>
+                <td colspan="9" class="text-center"> aOh! 此用户暂时还没有症状!</td>
+            </notempty>
+            </tbody>
+        </table>
+        <div class="form-item">
+            <button class="btn btn-return" onclick="javascript:history.back(-1);return false;">返 回</button>
+        </div>
+    </div>
+<block>
+<block name="script">
+<script type="text/javascript">
+    // 导航高亮
+    highlight_subnav('{:U('User/index')}');
+</script>
+</block>

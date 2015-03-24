@@ -1,0 +1,19 @@
+body{
+	font: 14px/1.5 "Microsoft Yahei","Hiragino Sans GB",tahoma,arial;
+}
+h1{
+	font-size: 20px;
+	color:#317EF3;
+	width:100%;
+}
+.content_info{
+	width:100%;font-size: 12px;color:#666;margin:10px 0px;height:20px;
+}
+.info_author{width:50%;float:left;}
+.info_ctime{width:50%;float:left;}
+.content{width:100%;margin-top:10px;font-size:16px}
+.page_select{width:100%;color:#317EF3;margin-top:20px;}
+.pre_content{width:100%;}
+.pre_content a{text-decoration: none;color:#317EF3;}
+.next_content{width:100%;}
+.next_content a{text-decoration: none;color:#317EF3;}
