@@ -5,8 +5,7 @@
  * Date: 1/14/14
  * Time: 8:12 PM
  */
-//0000
-//测试注释
+//hello word
 /**
  * 调试开关abbbbbdasdasdsasasadasdasdas
  * 项目正式部署后请设置为false
