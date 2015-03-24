@@ -76,12 +76,11 @@ class IndexController extends Controller
         if ($order == 'ctime') {
             $order = 'create_time desc';
         } else if ($order == 'reply') {
-            $order = 'create_time desc';
+            $order = 'reply_count desc';
         }else if($order == 'click'){
-            $order = 'create_time desc';
+            $order = 'view_count desc';
         }else{
-            $order = 'create_time desc';//默认的
-            
+            $order = 'id desc';//默认的
         }
         if ($id == 0) {
             $map = array('status' => 1);
@@ -170,45 +169,22 @@ class IndexController extends Controller
 *@param   $id   板块id
 *@param   array
 */
-    public function getTop($id=1){
+    public function getTop($id=1,$uid,$forum_key_value){
         $data = D('ForumPost')->getTop($id);
         if(empty($data)) return '';//没用置顶的帖子直接返回不做处理
         /*完善置顶的帖子内容*/
-        foreach ($data as &$val) {
-            $val['nickname']    = $this->getNickname($val['uid']);
-            $val['support']     = $this->getSupport($val['id']);
-            $val['bookmark']    = $this->getBookmark($val['id']);
-            $val['avatar']      = $this->getAvatar($val['uid']);
-            $val['content']     = strip_tags($val['content']);
-            $val['diwei']       = $this->getDiwei($val['uid']);
-            $val['isSupport']   = $this->isSupport($uid,$val['id']);
-            $val['reply_count'] = D('ForumPostReply')->getReplyCount($val['id']);
-            if(!empty($this->getImage($val['id']))){
-                $val['images']  = $this->getImage($val['id']);
-            }
-        }
-        return $data;
-    }
-/**
-大厅（全部帖子）---> 接口(按浏览次数最多的排序)
-*/
-    public function getAllList(){
-        $uid     = I('uid');
-        // if(empty($uid)) exit(err(100));
-        $pagenum = I('pagenum',1);
-        $pagesize = I('pagesize',10);
-        
-        $map['forum_id'] = 1;
-        $map['status']   = 1;
-        $count = M('ForumPost')->where($map)->count();
-        $list = M('ForumPost')->where($map)->page($pagenum,$pagesize)->order('create_time DESC')->select();
-        foreach ($list as &$v) {
-            $v['nickname']    = $this->getNickname($v['uid']);
+        foreach ($data as &$v) {
+            // 加入板块的信息
+            $forum = $forum_key_value[$v['forum_id']];
+            $v['forum_title'] = $forum['title'];
+            // 加入用户的信息
+            $info = query_user(array('avatar32','nickname','title'),$v['uid']);
+            $v['avatar']      = $info['avatar32'];
+            $v['diwei']       = $info['title'];
+            $v['nickname']    = $info['nickname'];
             $v['support']     = $this->getSupport($v['id']);
             $v['bookmark']    = $this->getBookmark($v['id']);
-            $v['avatar']      = $this->getAvatar($v['uid']);
             $v['content']     = strip_tags($v['content']);
-            $v['diwei']       = $this->getDiwei($v['uid']);
             $v['isSupport']   = $this->isSupport($uid,$v['id']);
             $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
             if(!empty($this->getImage($v['id']))){
@@ -216,6 +192,49 @@ class IndexController extends Controller
             }
             $v['types'] = 'all';
         }
+        unset($v);
+        return $data;
+    }
+/**
+大厅（全部帖子）---> 接口(按浏览次数最多的排序)
+*/
+    public function getAllList(){
+        $uid     = I('uid');
+        $pagenum   = I('pagenum',1);
+        $pagesize  = I('pagesize',10);
+        // 得到所有帖子列表
+        $map['status'] = 1;
+        $order     = 'create_time DESC';
+        $ForumPost = D('ForumPost');
+        $count     = $ForumPost->where($map)->count();
+        $list      = $ForumPost->where($map)->order($order)->page($pagenum,$pagesize)->select();
+        // 得到所有板块信息（带缓存）
+        $forums = D('Forum')->getForumList();
+        $forum_key_value = array();
+        foreach ($forums as $f) {
+            $forum_key_value[$f['id']] = $f;
+        }
+
+        foreach ($list as &$v) {
+            // 加入板块的信息
+            $forum = $forum_key_value[$v['forum_id']];
+            $v['forum_title'] = $forum['title'];
+            // 加入用户的信息
+            $info = query_user(array('avatar32','nickname','title'),$v['uid']);
+            $v['avatar']      = $info['avatar32'];
+            $v['diwei']       = $info['title'];
+            $v['nickname']    = $info['nickname'];
+            $v['support']     = $this->getSupport($v['id']);
+            $v['bookmark']    = $this->getBookmark($v['id']);
+            $v['content']     = strip_tags($v['content']);
+            $v['isSupport']   = $this->isSupport($uid,$v['id']);
+            $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
+            if(!empty($this->getImage($v['id']))){
+                $v['images']  = $this->getImage($v['id']);
+            }
+            $v['types'] = 'all';
+        }
+        unset($v);
         $totalpage = ceil($count/$pagesize);
         if($pagenum >= $totalpage){
             $hasNextPage = false;
@@ -223,7 +242,7 @@ class IndexController extends Controller
             $hasNextPage = true;
         }
         $datas = array(
-            'top'      =>$this->getTop(1),
+            'top'      =>$this->getTop(1,$uid,$forum_key_value),
             'pagedatas'=>$list,
             'totalcount'=>$count,
             'pagesize'=>$pagesize,
@@ -373,20 +392,6 @@ class IndexController extends Controller
         } else {
             $this->assign('forum', array('title' => '论坛 Forum'));
         }
-        foreach ($list as &$v) {
-	        $v['nickname']    = $this->getNickname($v['uid']);
-	        $v['support']     = $this->getSupport($v['id']);
-	        $v['bookmark']    = $this->getBookmark($v['id']);
-	        $v['avatar']      = $this->getAvatar($v['uid']);
-	        $v['content']     = strip_tags($v['content']);
-	        $v['diwei']       = $this->getDiwei($v['uid']);
-	        $v['isSupport']   = $this->isSupport($uid,$v['id']);
-	        $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
-	        if(!empty($this->getImage($v['id']))){
-	            $v['images']  = $this->getImage($v['id']);
-	        }
-	        $v['types'] = 'all';
-	    }
 
         // dump($list);
         $this->assignAllowPublish();
