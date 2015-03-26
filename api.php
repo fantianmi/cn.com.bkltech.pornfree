@@ -8,7 +8,7 @@
 
 
 /**
- * 调试开关abbbbba11111111aadasdas12312321321321dasdsadsadsadsabbasdasd
+ * 调试开关as woman
  * 项目正式部署后请设置为false
  */
 define ( 'APP_DEBUG', false );
