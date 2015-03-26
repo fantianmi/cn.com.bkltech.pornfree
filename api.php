@@ -8,7 +8,7 @@
 
 
 /**
- * 调试开关as woman
+ * 调试开关as woman do it
  * 项目正式部署后请设置为false
  */
 define ( 'APP_DEBUG', false );
