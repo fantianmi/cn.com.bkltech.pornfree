@@ -8,7 +8,11 @@
 
 
 /**
+<<<<<<< HEAD
  * 调试开关
+=======
+ * 调试开关as woman do it
+>>>>>>> origin/master
  * 项目正式部署后请设置为false
  */
 define ( 'APP_DEBUG', false );
