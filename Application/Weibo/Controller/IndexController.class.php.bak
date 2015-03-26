@@ -555,7 +555,7 @@ class IndexController extends Controller
 
         );
         // 缓存数据
-        //S('ranking_'.$uid.'_'.$pagenum,$data,600);
+        S('ranking_'.$uid.'_'.$pagenum,$data,600);
         echo json_encode(array('msg'=>'success','ret'=>0,'data'=>$data));
     }
 

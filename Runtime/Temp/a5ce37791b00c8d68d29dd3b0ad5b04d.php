@@ -1,3 +1,0 @@
-<?php
-//000000000060a:1:{i:0;a:10:{s:2:"id";s:3:"121";s:3:"uid";s:2:"83";s:7:"post_id";s:3:"224";s:5:"parse";s:1:"0";s:7:"content";s:6:"加油";s:11:"create_time";s:10:"1425091800";s:11:"update_time";s:10:"1425091800";s:6:"status";s:1:"1";s:4:"user";a:5:{s:8:"nickname";s:8:"tylerzkk";s:9:"avatar128";s:33:"Addons/Avatar/default_128_128.jpg";s:9:"space_url";s:48:"/index.php?s=/usercenter/index/index/uid/83.html";s:9:"rank_link";a:0:{}s:10:"icons_html";s:137:"<span class="usercenter-verify-icon-list"><img src="/Public/static/oneplus/images/mobile-bind.png" title="对方已绑定手机"/></span>";}s:9:"lzl_count";s:1:"0";}}
-?>

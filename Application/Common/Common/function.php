@@ -783,19 +783,12 @@ function execute_action($rules = false, $action_id = null, $user_id = null)
     if (!$rules || empty($action_id) || empty($user_id)) {
         return false;
     }
-
     $return = true;
     foreach ($rules as $rule) {
-        // dump($rules);
-        // echo $rule['rule'];
         //检查执行周期
         $map = array('action_id' => $action_id, 'user_id' => $user_id);
         $map['create_time'] = array('gt', NOW_TIME - intval($rule['cycle']) * 3600);
         $exec_count = M('ActionLog')->where($map)->count();
-        /*echo($exec_count);
-        echo "<br/>";
-        echo $rule['max'];
-        echo "<br/>";*/
         if ($exec_count > $rule['max']) {
             continue;
         }

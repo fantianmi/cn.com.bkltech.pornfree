@@ -1,3 +1,0 @@
-<?php
-//000000000060a:1:{i:0;a:10:{s:2:"id";s:2:"45";s:3:"uid";s:2:"71";s:7:"post_id";s:3:"140";s:5:"parse";s:1:"0";s:7:"content";s:6:"麽麽";s:11:"create_time";s:10:"1420479189";s:11:"update_time";s:10:"1420479189";s:6:"status";s:1:"1";s:4:"user";a:5:{s:9:"rank_link";a:0:{}s:10:"icons_html";s:49:"<span class="usercenter-verify-icon-list"></span>";s:9:"avatar128";s:43:"/thinkox4/Addons/Avatar/default_128_128.jpg";s:8:"nickname";s:6:"老油";s:9:"space_url";s:57:"/thinkox4/index.php?s=/usercenter/index/index/uid/71.html";}s:9:"lzl_count";s:1:"0";}}
-?>

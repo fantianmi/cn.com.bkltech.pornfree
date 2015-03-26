@@ -1,3 +1,0 @@
-<?php
-//000000000300a:2:{i:0;a:8:{s:2:"id";s:1:"1";s:5:"title";s:6:"大厅";s:11:"create_time";s:10:"1417837576";s:10:"post_count";s:3:"344";s:6:"status";s:1:"1";s:16:"allow_user_group";s:1:"1";s:4:"sort";s:1:"0";s:4:"logo";s:3:"161";}i:1;a:8:{s:2:"id";s:1:"2";s:5:"title";s:12:"问题求助";s:11:"create_time";s:10:"1417837635";s:10:"post_count";s:2:"65";s:6:"status";s:1:"1";s:16:"allow_user_group";s:1:"1";s:4:"sort";s:1:"0";s:4:"logo";s:3:"162";}}
-?>

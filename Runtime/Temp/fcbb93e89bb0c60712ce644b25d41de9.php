@@ -1,3 +1,0 @@
-<?php
-//000000000060a:1:{i:0;a:10:{s:2:"id";s:2:"96";s:3:"uid";s:3:"128";s:7:"post_id";s:3:"203";s:5:"parse";s:1:"0";s:7:"content";s:33:"你要去贴吧推广这个软件";s:11:"create_time";s:10:"1424749987";s:11:"update_time";s:10:"1424749987";s:6:"status";s:1:"1";s:4:"user";a:5:{s:9:"rank_link";a:0:{}s:10:"icons_html";s:49:"<span class="usercenter-verify-icon-list"></span>";s:9:"avatar128";s:33:"Addons/Avatar/default_128_128.jpg";s:8:"nickname";s:6:"ztboys";s:9:"space_url";s:49:"/index.php?s=/usercenter/index/index/uid/128.html";}s:9:"lzl_count";s:1:"0";}}
-?>

@@ -51,6 +51,13 @@ class IndexController extends Controller
     {
         redirect(U('forum', array('page' => intval($page))));
     }
+    
+    public function indexApi($page = 1)
+    {
+        $types=D('Forum')->getAllForums();
+        
+        echo json_encode(array('msg'=>'success','ret'=>0,'data'=>$types));
+    }
 
 
     // 获取论坛板块
@@ -78,9 +85,9 @@ class IndexController extends Controller
         } else if ($order == 'reply') {
             $order = 'reply_count desc';
         }else if($order == 'click'){
-            $order = 'view_count desc';
+            $order = 'id desc';
         }else{
-            $order = 'last_reply_time desc';//默认的
+            $order = 'id desc';//默认的
         }
         if ($id == 0) {
             $map = array('status' => 1);
@@ -241,15 +248,26 @@ class IndexController extends Controller
         }else{
             $hasNextPage = true;
         }
-        $datas = array(
-            'top'      =>$this->getTop(1,$uid,$forum_key_value),
-            'pagedatas'=>$list,
-            'totalcount'=>$count,
-            'pagesize'=>$pagesize,
-            'pagenum'=>$pagenum,
-            'totalpage'=>$totalpage,
-            "hasNextPage"=>$hasNextPage
-        );
+        if($$pagenum==1){
+	        $datas = array(
+	            'top'      =>$this->getTop(1,$uid,$forum_key_value),
+	            'pagedatas'=>$list,
+	            'totalcount'=>$count,
+	            'pagesize'=>$pagesize,
+	            'pagenum'=>$pagenum,
+	            'totalpage'=>$totalpage,
+	            "hasNextPage"=>$hasNextPage
+	        );
+        }else{
+	        	$datas = array(
+	            'pagedatas'=>$list,
+	            'totalcount'=>$count,
+	            'pagesize'=>$pagesize,
+	            'pagenum'=>$pagenum,
+	            'totalpage'=>$totalpage,
+	            "hasNextPage"=>$hasNextPage
+	        );
+        }
         echo json_encode(array('msg'=>'success','ret'=>0,'data'=>$datas));
     }
 /**
