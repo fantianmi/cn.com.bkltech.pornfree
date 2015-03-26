@@ -630,8 +630,9 @@ class IndexController extends Controller
             // $this->error('请输入标题。');
         }
         if ($forum_id == 0) {
-            echo json_encode(array('msg'=>'error','ret'=>200,'data'=>''));
-            exit;
+//            echo json_encode(array('msg'=>'error','ret'=>200,'data'=>''));
+//            exit;
+			$forum_id=1;
         }
 
 

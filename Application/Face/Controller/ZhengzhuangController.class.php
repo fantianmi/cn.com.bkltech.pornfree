@@ -299,7 +299,7 @@ class ZhengzhuangController extends Controller{
     		$zhengzhuang_record=M('zhengzhuang_record')->where($map)->order('create_time desc')->limit(1)->find();
     		$ctime=$zhengzhuang_record['create_time'];
     		if($ctime==''||$ctime==null){
-    			$this->addZhengScoreRecord($uid,$vals['zid'],5);
+    			$this->addZhengScoreRecord($uid,$vals['zid'],0);
     		}else if($ctime<$checkDate){
     			$this->autoInsertScore($uid,$vals['zid'],$ctime,$zhengzhuang_record['score']);
     		}
