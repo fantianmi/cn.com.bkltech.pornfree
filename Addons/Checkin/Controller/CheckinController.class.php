@@ -128,6 +128,7 @@ class CheckinController extends AddonsController{
                 M('jing_check')->add($datas);
 
                 echo json_encode(array('msg'=>'success','ret'=>0,'data'=>''));
+                D('PojieRank')->editStatus($uid);
             }
         }else{
             echo json_encode(array('msg'=>'error','ret'=>200,'data'=>''));

@@ -51,6 +51,13 @@ class IndexController extends Controller
     {
         redirect(U('forum', array('page' => intval($page))));
     }
+    
+    public function indexApi($page = 1)
+    {
+        $types=D('Forum')->getAllForums();
+        
+        echo json_encode(array('msg'=>'success','ret'=>0,'data'=>$types));
+    }
 
 
     // 获取论坛板块
@@ -71,14 +78,14 @@ class IndexController extends Controller
         return $arr['path'];
     }
     // 获取板块帖子
-    public function getList($id = 0,$order = 'reply',$pagenum = 1,$pagesize = 10){
+    public function getList($id = 0,$order = 'id',$pagenum = 1,$pagesize = 10){
         $id = intval($id);
         if ($order == 'ctime') {
             $order = 'create_time desc';
         } else if ($order == 'reply') {
             $order = 'reply_count desc';
         }else if($order == 'click'){
-            $order = 'view_count desc';
+            $order = 'id desc';
         }else{
             $order = 'id desc';//默认的
         }
@@ -89,6 +96,13 @@ class IndexController extends Controller
         }
         $count = D('ForumPost')->where($map)->count();
         $list = D('ForumPost')->where($map)->order($order)->page($pagenum, $pagesize)->select();
+        
+        $forums = D('Forum')->getForumList();
+        $forum_key_value = array();
+        foreach ($forums as $f) {
+            $forum_key_value[$f['id']] = $f;
+        }
+        
         foreach ($list as &$v) {
             $v['nickname'] = $this->getNickname($v['uid']);
             $v['support'] = $this->getSupport($v['id']);
@@ -103,14 +117,26 @@ class IndexController extends Controller
         }else{
             $hasNextPage = true;
         }
-        $datas = array(
-            'pagedatas'=>$list,
-            'totalcount'=>$count,
-            'pagesize'=>$pagesize,
-            'pagenum'=>$pagenum,
-            'totalpage'=>$totalpage,
-            "hasNextPage"=>$hasNextPage
-        );
+        if($$pagenum==1){
+	        $datas = array(
+	            'top'      =>$this->getTop($id,$uid,$forum_key_value),
+	            'pagedatas'=>$list,
+	            'totalcount'=>$count,
+	            'pagesize'=>$pagesize,
+	            'pagenum'=>$pagenum,
+	            'totalpage'=>$totalpage,
+	            "hasNextPage"=>$hasNextPage
+	        );
+        }else{
+	        	$datas = array(
+	            'pagedatas'=>$list,
+	            'totalcount'=>$count,
+	            'pagesize'=>$pagesize,
+	            'pagenum'=>$pagenum,
+	            'totalpage'=>$totalpage,
+	            "hasNextPage"=>$hasNextPage
+	        );
+        }
         echo json_encode(array('msg'=>'success','ret'=>0,'data'=>$datas));
     }
 /**
@@ -241,15 +267,26 @@ class IndexController extends Controller
         }else{
             $hasNextPage = true;
         }
-        $datas = array(
-            'top'      =>$this->getTop(1,$uid,$forum_key_value),
-            'pagedatas'=>$list,
-            'totalcount'=>$count,
-            'pagesize'=>$pagesize,
-            'pagenum'=>$pagenum,
-            'totalpage'=>$totalpage,
-            "hasNextPage"=>$hasNextPage
-        );
+        if($pagenum==1){
+            $datas = array(
+                'top'      =>$this->getTop(1,$uid,$forum_key_value),
+                'pagedatas'=>$list,
+                'totalcount'=>$count,
+                'pagesize'=>$pagesize,
+                'pagenum'=>$pagenum,
+                'totalpage'=>$totalpage,
+                "hasNextPage"=>$hasNextPage
+            );
+        }else{
+                $datas = array(
+                'pagedatas'=>$list,
+                'totalcount'=>$count,
+                'pagesize'=>$pagesize,
+                'pagenum'=>$pagenum,
+                'totalpage'=>$totalpage,
+                "hasNextPage"=>$hasNextPage
+            );
+        }
         echo json_encode(array('msg'=>'success','ret'=>0,'data'=>$datas));
     }
 /**
@@ -264,15 +301,27 @@ class IndexController extends Controller
         $map['status'] = 1;
         $count = M('ForumPost')->where($map)->count();
         $list = M('ForumPost')->where($map)->page($pagenum,$pagesize)->order('reply_count DESC')->select();
+        // 得到所有板块信息（带缓存）
+        $forums = D('Forum')->getForumList();
+        $forum_key_value = array();
+        foreach ($forums as $f) {
+            $forum_key_value[$f['id']] = $f;
+        }
         foreach ($list as &$v) {
-            $v['nickname']    = $this->getNickname($v['uid']);
+            // 加入板块的信息
+            $forum = $forum_key_value[$v['forum_id']];
+            $v['forum_title'] = $forum['title'];
+            // 加入用户的信息
+            $info = query_user(array('avatar32','nickname','title'),$v['uid']);
+            $v['avatar']      = $info['avatar32'];
+            $v['diwei']       = $info['title'];
+            $v['nickname']    = $info['nickname'];
             $v['support']     = $this->getSupport($v['id']);
             $v['bookmark']    = $this->getBookmark($v['id']);
-            $v['avatar']      = $this->getAvatar($v['uid']);
             $v['content']     = strip_tags($v['content']);
-            $v['diwei']       = $this->getDiwei($v['uid']);
             $v['isSupport']   = $this->isSupport($uid,$v['id']);
             $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
+
             if(!empty($this->getImage($v['id']))){
                 $v['images']  = $this->getImage($v['id']);
             }
@@ -304,13 +353,24 @@ class IndexController extends Controller
         $map['status'] = 1;
         $count = M('ForumPost')->where($map)->count();
         $list  = M('ForumPost')->where($map)->page($pagenum,$pagesize)->order('create_time DESC')->select();
+        // 得到所有板块信息（带缓存）
+        $forums = D('Forum')->getForumList();
+        $forum_key_value = array();
+        foreach ($forums as $f) {
+            $forum_key_value[$f['id']] = $f;
+        }
         foreach ($list as &$v) {
-            $v['nickname']    = $this->getNickname($v['uid']);
+            // 加入板块的信息
+            $forum = $forum_key_value[$v['forum_id']];
+            $v['forum_title'] = $forum['title'];
+            // 加入用户的信息
+            $info = query_user(array('avatar32','nickname','title'),$v['uid']);
+            $v['avatar']      = $info['avatar32'];
+            $v['diwei']       = $info['title'];
+            $v['nickname']    = $info['nickname'];
             $v['support']     = $this->getSupport($v['id']);
             $v['bookmark']    = $this->getBookmark($v['id']);
-            $v['avatar']      = $this->getAvatar($v['uid']);
             $v['content']     = strip_tags($v['content']);
-            $v['diwei']       = $this->getDiwei($v['uid']);
             $v['isSupport']   = $this->isSupport($uid,$v['id']);
             $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
             if(!empty($this->getImage($v['id']))){
@@ -593,6 +653,8 @@ class IndexController extends Controller
 
     public function doEdit($uid = 0,$post_id = null, $forum_id = 0,$image='', $title, $content)
     {
+        if($uid < 1) exit( err(100,'参数出错') );
+
         $post_id = intval($post_id);
         $forum_id = intval($forum_id);
         $title = op_t($title);
@@ -612,8 +674,9 @@ class IndexController extends Controller
             // $this->error('请输入标题。');
         }
         if ($forum_id == 0) {
-            echo json_encode(array('msg'=>'error','ret'=>200,'data'=>''));
-            exit;
+//            echo json_encode(array('msg'=>'error','ret'=>200,'data'=>''));
+//            exit;
+            $forum_id=1;
         }
 
 

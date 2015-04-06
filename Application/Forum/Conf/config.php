@@ -31,4 +31,10 @@ return array(
         '__CSS__'    => __ROOT__ . '/Public/' . MODULE_NAME . '/css',
         '__JS__'     => __ROOT__ . '/Public/' . MODULE_NAME . '/js',
     ),
+    /*大厅板块信息*/
+    'HALL_FORUM'     => array(
+        'title'      => '大厅',
+        'post_count' => 0,
+        'logo'       => '/Uploads/Picture/2015-03-27/5514bcf773bf8_128_128.png'
+    ),
 );

@@ -166,7 +166,7 @@ class ForumController extends AdminController
         }
         if ($forum_id) $map['forum_id'] = $forum_id;
         $model = M('ForumPost');
-        $list = $model->where($map)->order('last_reply_time desc')->page($page, $r)->select();
+        $list = $model->where($map)->order('id desc')->page($page, $r)->select();
         $totalCount = $model->where($map)->count();
 
         foreach ($list as &$v) {

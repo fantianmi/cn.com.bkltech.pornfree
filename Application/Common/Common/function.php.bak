@@ -786,12 +786,16 @@ function execute_action($rules = false, $action_id = null, $user_id = null)
 
     $return = true;
     foreach ($rules as $rule) {
-
+        // dump($rules);
+        // echo $rule['rule'];
         //检查执行周期
         $map = array('action_id' => $action_id, 'user_id' => $user_id);
-        // $map['create_time'] = array('gt', NOW_TIME - intval($rule['cycle']) * 3600);
-        $map['create_time'] = array('gt', strtotime(date('Ymd')));
+        $map['create_time'] = array('gt', NOW_TIME - intval($rule['cycle']) * 3600);
         $exec_count = M('ActionLog')->where($map)->count();
+        /*echo($exec_count);
+        echo "<br/>";
+        echo $rule['max'];
+        echo "<br/>";*/
         if ($exec_count > $rule['max']) {
             continue;
         }
@@ -802,6 +806,7 @@ function execute_action($rules = false, $action_id = null, $user_id = null)
          * 判断是否加入了货币规则
          * @author 郑钟良<zzl@ourstu.com>
          */
+        // dump($Model);
         if ($rule['tox_money_rule'] != '' && $rule['tox_money_rule'] != null) {
             $change = array($rule['field'] => array('exp', $rule['rule']), $rule['tox_money_field'] => array('exp', $rule['tox_money_rule']));
             $res = $Model->where($rule['condition'])->setField($change);
@@ -809,10 +814,12 @@ function execute_action($rules = false, $action_id = null, $user_id = null)
             $field = $rule['field'];
             $res = $Model->where($rule['condition'])->setField($field, array('exp', $rule['rule']));
         }
+        // dump($rule['condition']);
         if (!$res) {
             $return = false;
         }
     }
+    // dump($res);
     return $return;
 }
 

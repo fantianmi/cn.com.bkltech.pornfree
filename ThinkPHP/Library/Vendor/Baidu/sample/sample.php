@@ -8,15 +8,6 @@ $apiKey = "f6euH62rh1zdccUzAcmoi1mK";
 $secretKey = "RIW6fznQZ8SRX3AlAg9GfS5KoxHCb7G0";
 
 
-function error_output ( $str ) 
-{
-	echo "\033[1;40;31m" . $str ."\033[0m" . "\n";
-}
-
-function right_output ( $str ) 
-{
-    echo "\033[1;40;32m" . $str ."\033[0m" . "\n";
-}
 
 function test_queryBindList ( $userId ) 
 {
@@ -39,7 +30,7 @@ function test_queryBindList ( $userId )
 	}	
 }
 // 推送adnroid设备透传
-function test_pushMessage_android_tou ($user_id,$title='',$content='')
+function test_pushMessage_android_tou ($user_id,$title='',$content='',$type='')
 {
     $apiKey    = C('APIKEY');
     $secretKey = C('SECRET_KEY');
@@ -58,7 +49,8 @@ function test_pushMessage_android_tou ($user_id,$title='',$content='')
     //通知类型的内容必须按指定内容发送，示例如下：
     $message = '{ 
             "title": "'.$title.'",
-            "description": "'.$content.'"
+            "description": "'.$content.'",
+            "custom_content": {"type":"'.$type.'"}
         }';
     
     $message_key = "msg_key";
@@ -73,7 +65,7 @@ function test_pushMessage_android_tou ($user_id,$title='',$content='')
     }
 }
 //推送android设备消息
-function test_pushMessage_android ($user_id,$title='',$content='',$uid='')
+function test_pushMessage_android ($user_id,$title='',$content='',$type='')
 {
     $apiKey    = C('APIKEY');
     $secretKey = C('SECRET_KEY');
@@ -93,7 +85,7 @@ function test_pushMessage_android ($user_id,$title='',$content='',$uid='')
 	$message = '{ 
 			"title": "'.$title.'",
             "description": "'.$content.'",
-            "custom_content": {"uid":"'.$uid.'"}
+            "custom_content": {"type":"'.$type.'"}
  		}';
 	
 	$message_key = "msg_key";
@@ -108,8 +100,9 @@ function test_pushMessage_android ($user_id,$title='',$content='',$uid='')
     }
 }
 //推送ios设备消息
-function test_pushMessage_ios ($user_id,$title='',$content='',$uid='')
+function test_pushMessage_ios ($user_id,$title='',$content='',$type='')
 {
+    return '';
     $apiKey    = C('APIKEY');
 	$secretKey = C('SECRET_KEY');
     $channel = new Channel ( $apiKey, $secretKey ) ;
@@ -123,7 +116,7 @@ function test_pushMessage_ios ($user_id,$title='',$content='',$uid='')
 	$optional[Channel::MESSAGE_TYPE] = 1;
 	//如果ios应用当前部署状态为开发状态，指定DEPLOY_STATUS为1，默认是生产状态，值为2.
 	//旧版本曾采用不同的域名区分部署状态，仍然支持。
-	$optional[Channel::DEPLOY_STATUS] = 1;
+	$optional[Channel::DEPLOY_STATUS] = 2;
 	//通知类型的内容必须按指定内容发送，示例如下：
 	$message = '{ 
         "title": "'.$title.'",
@@ -132,8 +125,8 @@ function test_pushMessage_ios ($user_id,$title='',$content='',$uid='')
 			"alert":"'.$title.'",
 			"sound":"www.bkltech.pornfree",
 			"badge":0
-            
-		}
+		},
+        "type":'.$type.'
  	}';
 	
 	$message_key = "msg_key";

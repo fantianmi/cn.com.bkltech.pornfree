@@ -56,6 +56,7 @@ class PublicController extends Controller{
 		}else{
 			/*获取签到总天数*/
 			$total = $model->field('total_num')->where("uid={$uid}")->order('ctime DESC')->limit(1)->find();
+
 			/*将连签天数改为0*/
 			$content = '很遗憾！今天你已经破解。';
 			$data = array(
@@ -66,9 +67,17 @@ class PublicController extends Controller{
 				'content'   => $content,
 			);
 			$result = $model->add($data);
+            /*如果今天有签到记录就删除*/
+            $maps['ctime']   = array('gt',strtotime(date('Ymd')));
+            $maps['uid']     = $uid;
+            $maps['con_num'] = array('neq',0);
+            $model->where($maps)->delete();
+
 			if($result){
 				echo suc();
 				D('JingCheck')->addData($uid,$content);
+				// 向破解排行表里插入信息
+				D('PojieRank')->pojie($uid);
 			}else{
 				echo err(300,'破戒失败了,请联系管理员');
 			}

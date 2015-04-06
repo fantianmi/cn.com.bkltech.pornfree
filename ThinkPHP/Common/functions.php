@@ -449,6 +449,7 @@ function file_exists_case($filename) {
  * @return boolean
  */
 function import($class, $baseUrl = '', $ext=EXT) {
+
     static $_file = array();
     $class = str_replace(array('.', '#'), array('/', '.'), $class);
     if (isset($_file[$class . $baseUrl]))

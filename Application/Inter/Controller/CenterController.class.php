@@ -13,13 +13,17 @@ class CenterController extends CommonController
  * @param  int    $follow_who   被关注
  */
 	public function follow(){
-		$who_follow = I('who_follow');
-		$follow_who = I('follow_who');
-		if(empty($who_follow) || empty($follow_who))
+		$who_follow = I('who_follow',0,'intval');
+		$follow_who = I('follow_who',0,'intval');
+		if($who_follow < 1 || $follow_who < 1)
 			exit( err(100,'关注人和被关注人id不能为空') );
 
 		if(D('Follow')->hg_follow($who_follow, $follow_who)){
-			echo suc('','关注成功');
+			echo suc('','关注成功了');
+			// 推送消息
+			$nickname = query_user('nickname',$who_follow);
+			$title = $nickname . '关注了您';
+			$re = D('BaiTui')->genDataOne($follow_who,$title,$title,'attention');
 		}else{
 			echo err(1,'关注失败');
 		}
@@ -100,6 +104,9 @@ class CenterController extends CommonController
 	public function createTalk(){
 		$uid    = I('uid','','intval');
 		$to_uid = I('to_uid','','intval');
+        // 不能与自己聊天
+        if($uid == $to_uid) exit( err(100,'参数错误') );
+        
 		if(empty($uid) || empty($to_uid))
 			exit( err(100, '参数出错') );
         $memebers = explode(',', $to_uid);
@@ -109,6 +116,21 @@ class CenterController extends CommonController
         echo suc(array('talk_id'=>$talk['id']),'创建成功');
         // return $talk['id'];
 	}
+
+/**
+ * 删除聊天对象
+ * @param int $talk_id  聊天对象的id
+ */
+    public function delTalk(){
+        $talk_id = I('talk_id',0,'intval');
+        if($talk_id < 1) exit( err(100,'聊天对象id不能为空') );
+        if(D('Talk')->where('id='.$talk_id)->delete()){
+            echo suc('','删除成功');
+        }else{
+            echo err(1,'删除失败');
+        }
+    }
+
 /**
  * 我的私信聊天列表接口
  * @return [type] [description]
@@ -186,7 +208,6 @@ class CenterController extends CommonController
         // $talk['mid'] = $_uid;
         echo sucp($pagenum,$pagesize,$count,$talk['messages']?$talk['messages']:'');
     }
-// http://pornfree.bkltech.com.cn/index.php?s=/inter/center/getSession/talk_id/164/uid/1
 /**
  * 聊天框发送消息接口
  * 
@@ -219,6 +240,8 @@ class CenterController extends CommonController
         $data['nickname'] = $info['nickname'];
         $data['avatar']   = $info['avatar32'];
         echo suc($data, '发送成功');
+        // 发送成功推送消息
+        D('Talk')->tuiMessage($talk_id,$uid);
 	}
 /**
  * 根据症状id获取相同症状的所有人
@@ -255,9 +278,78 @@ class CenterController extends CommonController
 		$info['ranking']   = D('Weibo/CheckInfo')->getRanking($to_uid);
 		echo suc($info,'操作成功');
 	}
-
+/**
+ * 搜藏文章接口
+ * @param  int   id   文章id
+ * @param  int   uid  用户id
+ */
+	public function bookmark(){
+		$uid         = I('uid',0,'intval');
+		$document_id = I('id',0,'intval');
+		if($uid < 1 || $document_id < 1) exit( err(100, '文章id和用户id不能为空') );
+		$model = D('DocumentBookmark');
+		if($model->checkBook($uid,$document_id)) exit( err(100, '已经收藏过了') );
+		if($model->bookmark($uid,$document_id)){
+			echo suc(0,'收藏成功');
+		}else{
+			echo err(200, '收藏失败');
+		}
+	}
+/**
+ * 取消收藏文章接口
+ * @return [type] [description]
+ */
+	public function unBookmark(){
+		$uid         = I('uid',0,'intval');
+		$document_id = I('id',0,'intval');
+		if($uid < 1 || $document_id < 1) exit( err(100, '文章id和用户id不能为空') );
+		if(D('DocumentBookmark')->unBookmark($uid,$document_id)){
+			echo suc('','取消收藏成功');
+		}else{
+			echo err(200,'取消收藏失败');
+		}
+	}
+/**
+ * 用户获取文章的收藏列表
+ * @param   Inter  $uid 用户id
+ */
+	public function bookList(){
+		$uid      = I('uid',0,'intval');
+		$pagenum  = I('pagenum',1,'intval');
+		$pagesize = I('pagesize',10,'intval');
+		if($uid < 1) exit( err(100,'用户id不能为空') );
+		$list = D('DocumentBookmark')->getList($uid,$pagenum,$pagesize,$totalcount);
+		// 加入一些必须的数据
+		$model = D('DocumentBookmark');
+        foreach ($list as &$v) {
+            $v['isbook'] = $model->checkBook($uid,$v['id']);
+        }
+        unset($v);
+		echo sucp($pagenum,$pagesize,$totalcount,$list);
+	}
+/**
+ * 破解排行榜接口
+ */
+	public function pojieRank(){
+		$pagenum  = I('pagenum',1);
+		$pagesize = I('pagesize',10);
+		$list     = D('PojieRank')->rank($pagenum,$pagesize,$totalcount);
+		echo sucp($pagenum,$pagesize,$totalcount,$list);
+	}
+/**
+ * 积分等级排行榜
+ */
+    public function scoreRank(){
+        $pagenum  = I('pagenum',1);
+        $pagesize = I('pagesize',10);
+        $list     = D('Member')->rank($pagenum,$pagesize,$totalcount);
+        echo sucp($pagenum,$pagesize,$totalcount,$list);
+    }
+	
     
-
+	public function cishi(){
+		exit();
+	}
 
 
 

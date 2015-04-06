@@ -174,9 +174,11 @@ class ArticleController extends BlogController
             echo json_encode(array('msg'=>'error','ret'=>100,'data'=>''));
             exit;
         }
-        $data = M('check_info')->where("uid={$uid}")->order("ctime DESC")->find();
-        $count = M('check_info')->where("uid={$uid}")->count();
-        $check = M('check_info')->where("uid={$uid}")->order("ctime DESC")->page($pagenum,$pagesize)->select();
+        $map['uid']     = $uid;
+        $map['con_num'] = array('neq',0);
+        $data = M('check_info')->where($map)->order("ctime DESC")->find();
+        $count = M('check_info')->where($map)->count();
+        $check = M('check_info')->where($map)->order("ctime DESC")->page($pagenum,$pagesize)->select();
         $totalpage = ceil($count/$pagesize);
         if($pagenum >= $totalpage){
             $hasNextPage = false;

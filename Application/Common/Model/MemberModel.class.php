@@ -57,7 +57,20 @@ class MemberModel extends Model
 		return $result ? true : false;
 	}
 
-
+/**
+ * 积分排行榜
+ */
+    public function rank($pagenum=1,$pagesize=10,&$totalcount=0){
+        $totalcount = $this->where('status=1')->count();
+        $map['status'] = 1;
+        $map['uid']    = array('neq','99');
+        $list = $this->field('uid,nickname,score')->where($map)->order('score DESC')->page($pagenum,$pagesize)->select();
+        foreach($list as &$val){
+            $val['avatar'] = query_user('avatar32',$val['uid']);
+        }
+        unset($val);
+        return $list;
+    }
 
 
 }

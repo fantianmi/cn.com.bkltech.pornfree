@@ -78,7 +78,7 @@ class IndexController extends Controller
         return $arr['path'];
     }
     // 获取板块帖子
-    public function getList($id = 0,$order = 'reply',$pagenum = 1,$pagesize = 10){
+    public function getList($id = 0,$order = 'id',$pagenum = 1,$pagesize = 10){
         $id = intval($id);
         if ($order == 'ctime') {
             $order = 'create_time desc';
@@ -96,12 +96,25 @@ class IndexController extends Controller
         }
         $count = D('ForumPost')->where($map)->count();
         $list = D('ForumPost')->where($map)->order($order)->page($pagenum, $pagesize)->select();
-        foreach ($list as &$v) {
-            $v['nickname'] = $this->getNickname($v['uid']);
-            $v['support'] = $this->getSupport($v['id']);
-            $v['avatar'] = $this->getAvatar($v['uid']);
-            $v['content'] = strip_tags($v['content']);
+        
+        $forums = D('Forum')->getForumList();
+        $forum_key_value = array();
+        foreach ($forums as $f) {
+            $forum_key_value[$f['id']] = $f;
         }
+        
+        foreach ($list as &$v) {
+            $info = query_user(array('nickname','avatar32','title'),$v['uid']);
+            $v['nickname'] = $info['nickname'];
+            $v['avatar']   = $info['avatar32'];
+            $v['diwei']    = $info['title'];
+            $v['support']  = $this->getSupport($v['id']);
+            $v['content']  = strip_tags($v['content']);
+            if(!empty($this->getImage($v['id']))){
+                $v['images']  = $this->getImage($v['id']);
+            }
+        }
+        unset($v);
         // $list['content'] = strip_tags($list['content']);
         // dump($list);
         $totalpage = ceil($count/$pagesize);
@@ -110,14 +123,29 @@ class IndexController extends Controller
         }else{
             $hasNextPage = true;
         }
-        $datas = array(
-            'pagedatas'=>$list,
-            'totalcount'=>$count,
-            'pagesize'=>$pagesize,
-            'pagenum'=>$pagenum,
-            'totalpage'=>$totalpage,
-            "hasNextPage"=>$hasNextPage
-        );
+        if($pagenum==1){
+            $top['top'] = $this->getTop($id,$uid,$forum_key_value,1);
+	        $datas = array(
+	            'pagedatas'=>$list,
+	            'totalcount'=>$count,
+	            'pagesize'=>$pagesize,
+	            'pagenum'=>$pagenum,
+	            'totalpage'=>$totalpage,
+	            "hasNextPage"=>$hasNextPage
+	        );
+            if($top['top']){
+                $datas = array_merge($top,$datas);
+            }
+        }else{
+	        $datas = array(
+	            'pagedatas'=>$list,
+	            'totalcount'=>$count,
+	            'pagesize'=>$pagesize,
+	            'pagenum'=>$pagenum,
+	            'totalpage'=>$totalpage,
+	            "hasNextPage"=>$hasNextPage
+	        );
+        }
         echo json_encode(array('msg'=>'success','ret'=>0,'data'=>$datas));
     }
 /**
@@ -176,8 +204,8 @@ class IndexController extends Controller
 *@param   $id   板块id
 *@param   array
 */
-    public function getTop($id=1,$uid,$forum_key_value){
-        $data = D('ForumPost')->getTop($id);
+    public function getTop($id=1,$uid,$forum_key_value,$is_top=2){
+        $data = D('ForumPost')->getTop($id,5,$is_top);
         if(empty($data)) return '';//没用置顶的帖子直接返回不做处理
         /*完善置顶的帖子内容*/
         foreach ($data as &$v) {
@@ -193,7 +221,7 @@ class IndexController extends Controller
             $v['bookmark']    = $this->getBookmark($v['id']);
             $v['content']     = strip_tags($v['content']);
             $v['isSupport']   = $this->isSupport($uid,$v['id']);
-            $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
+//            $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
             if(!empty($this->getImage($v['id']))){
                 $v['images']  = $this->getImage($v['id']);
             }
@@ -210,8 +238,9 @@ class IndexController extends Controller
         $pagenum   = I('pagenum',1);
         $pagesize  = I('pagesize',10);
         // 得到所有帖子列表
-        $map['status'] = 1;
-        $order     = 'create_time DESC';
+        $map['status']   = 1;
+        $map['forum_id'] = array('neq',11);
+        $order     = 'last_reply_time DESC';
         $ForumPost = D('ForumPost');
         $count     = $ForumPost->where($map)->count();
         $list      = $ForumPost->where($map)->order($order)->page($pagenum,$pagesize)->select();
@@ -235,7 +264,7 @@ class IndexController extends Controller
             $v['bookmark']    = $this->getBookmark($v['id']);
             $v['content']     = strip_tags($v['content']);
             $v['isSupport']   = $this->isSupport($uid,$v['id']);
-            $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
+//            $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
             if(!empty($this->getImage($v['id']))){
                 $v['images']  = $this->getImage($v['id']);
             }
@@ -248,25 +277,25 @@ class IndexController extends Controller
         }else{
             $hasNextPage = true;
         }
-        if($$pagenum==1){
-	        $datas = array(
-	            'top'      =>$this->getTop(1,$uid,$forum_key_value),
-	            'pagedatas'=>$list,
-	            'totalcount'=>$count,
-	            'pagesize'=>$pagesize,
-	            'pagenum'=>$pagenum,
-	            'totalpage'=>$totalpage,
-	            "hasNextPage"=>$hasNextPage
-	        );
+        if($pagenum==1){
+            $datas = array(
+                'top'      =>$this->getTop(1,$uid,$forum_key_value),
+                'pagedatas'=>$list,
+                'totalcount'=>$count,
+                'pagesize'=>$pagesize,
+                'pagenum'=>$pagenum,
+                'totalpage'=>$totalpage,
+                "hasNextPage"=>$hasNextPage
+            );
         }else{
-	        	$datas = array(
-	            'pagedatas'=>$list,
-	            'totalcount'=>$count,
-	            'pagesize'=>$pagesize,
-	            'pagenum'=>$pagenum,
-	            'totalpage'=>$totalpage,
-	            "hasNextPage"=>$hasNextPage
-	        );
+                $datas = array(
+                'pagedatas'=>$list,
+                'totalcount'=>$count,
+                'pagesize'=>$pagesize,
+                'pagenum'=>$pagenum,
+                'totalpage'=>$totalpage,
+                "hasNextPage"=>$hasNextPage
+            );
         }
         echo json_encode(array('msg'=>'success','ret'=>0,'data'=>$datas));
     }
@@ -279,18 +308,31 @@ class IndexController extends Controller
         $pagenum = I('pagenum',1);
         $pagesize = I('pagesize',10);
 
-        $map['status'] = 1;
+        $map['status']   = 1;
+        $map['forum_id'] = array('neq',11);
         $count = M('ForumPost')->where($map)->count();
         $list = M('ForumPost')->where($map)->page($pagenum,$pagesize)->order('reply_count DESC')->select();
+        // 得到所有板块信息（带缓存）
+        $forums = D('Forum')->getForumList();
+        $forum_key_value = array();
+        foreach ($forums as $f) {
+            $forum_key_value[$f['id']] = $f;
+        }
         foreach ($list as &$v) {
-            $v['nickname']    = $this->getNickname($v['uid']);
+            // 加入板块的信息
+            $forum = $forum_key_value[$v['forum_id']];
+            $v['forum_title'] = $forum['title'];
+            // 加入用户的信息
+            $info = query_user(array('avatar32','nickname','title'),$v['uid']);
+            $v['avatar']      = $info['avatar32'];
+            $v['diwei']       = $info['title'];
+            $v['nickname']    = $info['nickname'];
             $v['support']     = $this->getSupport($v['id']);
             $v['bookmark']    = $this->getBookmark($v['id']);
-            $v['avatar']      = $this->getAvatar($v['uid']);
             $v['content']     = strip_tags($v['content']);
-            $v['diwei']       = $this->getDiwei($v['uid']);
             $v['isSupport']   = $this->isSupport($uid,$v['id']);
-            $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
+//            $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
+
             if(!empty($this->getImage($v['id']))){
                 $v['images']  = $this->getImage($v['id']);
             }
@@ -322,13 +364,24 @@ class IndexController extends Controller
         $map['status'] = 1;
         $count = M('ForumPost')->where($map)->count();
         $list  = M('ForumPost')->where($map)->page($pagenum,$pagesize)->order('create_time DESC')->select();
+        // 得到所有板块信息（带缓存）
+        $forums = D('Forum')->getForumList();
+        $forum_key_value = array();
+        foreach ($forums as $f) {
+            $forum_key_value[$f['id']] = $f;
+        }
         foreach ($list as &$v) {
-            $v['nickname']    = $this->getNickname($v['uid']);
+            // 加入板块的信息
+            $forum = $forum_key_value[$v['forum_id']];
+            $v['forum_title'] = $forum['title'];
+            // 加入用户的信息
+            $info = query_user(array('avatar32','nickname','title'),$v['uid']);
+            $v['avatar']      = $info['avatar32'];
+            $v['diwei']       = $info['title'];
+            $v['nickname']    = $info['nickname'];
             $v['support']     = $this->getSupport($v['id']);
             $v['bookmark']    = $this->getBookmark($v['id']);
-            $v['avatar']      = $this->getAvatar($v['uid']);
             $v['content']     = strip_tags($v['content']);
-            $v['diwei']       = $this->getDiwei($v['uid']);
             $v['isSupport']   = $this->isSupport($uid,$v['id']);
             $v['reply_count'] = D('ForumPostReply')->getReplyCount($v['id']);
             if(!empty($this->getImage($v['id']))){
@@ -611,6 +664,8 @@ class IndexController extends Controller
 
     public function doEdit($uid = 0,$post_id = null, $forum_id = 0,$image='', $title, $content)
     {
+        if($uid < 1) exit( err(100,'参数出错') );
+
         $post_id = intval($post_id);
         $forum_id = intval($forum_id);
         $title = op_t($title);
@@ -621,9 +676,7 @@ class IndexController extends Controller
         $isEdit = $post_id ? true : false;
         $forum_id = intval($forum_id);
 
-        //确认当前论坛能发帖
-        $this->requireForumAllowPublish($forum_id);
-
+        
         if ($title == '') {
             echo json_encode(array('msg'=>'error','ret'=>100,'data'=>''));
             exit;
@@ -632,7 +685,7 @@ class IndexController extends Controller
         if ($forum_id == 0) {
 //            echo json_encode(array('msg'=>'error','ret'=>200,'data'=>''));
 //            exit;
-			$forum_id=1;
+            $forum_id=1;
         }
 
 

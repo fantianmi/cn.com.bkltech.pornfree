@@ -523,7 +523,6 @@ class IndexController extends Controller
         $pagenum  = I('pagenum',1);
         $pagesize = I('pagesize',10);
         $uid      = I('uid');
-        //去掉缓存，缓存会造成排名无法显示
         //$ranking  = S('ranking_'.$uid.'_'.$pagenum);
         //if(!empty($ranking)) exit( $ranking );
         // if(empty($uid)) exit(err(100));
@@ -622,7 +621,10 @@ class IndexController extends Controller
     }
 /*获取积分获取的规则*/
     public function getScoreRule(){
+        $cache = S('ScoreRule');
+        if(!empty($cache)) return $cache;
         $rule = M('action')->field('id,title,remark')->where("type=2 and status=1")->select();
+        S('ScoreRule',$rule,600);
         return $rule;
     }
 /*获取等级范围*/
@@ -640,6 +642,10 @@ class IndexController extends Controller
             $i++;
         }
         return $arrs;
+    }
+    public function ceshi(){
+        $re = D('BaiTui')->genDataOne(164,'标题','描述','ceshi');
+        dump($re);
     }
 
 }

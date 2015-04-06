@@ -288,9 +288,19 @@ class TalkModel extends Model
         return $talk;
         /*创建talk end*/
     }
-
-
-
+// 私信推送
+    public function tuiMessage($talk_id,$uid){
+        $talk = $this->find($talk_id);
+        $origin_member = $this->decodeArrayByRec(explode(',', $talk['uids']));
+        foreach($origin_member as $mem){
+            if($mem != $uid){
+                $to_uid = $mem;
+            }
+        }
+        $nickname = query_user('nickname',$uid);
+        $title    = $nickname . '私信了您';
+        $re = D('BaiTui')->genDataOne($to_uid,$title,$title,'private_letter');
+    }
 
 
 

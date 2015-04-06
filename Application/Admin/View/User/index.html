@@ -60,8 +60,10 @@
                         </td>
                         <td>{$vo.status_text}</td>
                         <td>
-                            <a href="{:U('User/zhengDetail',array('uid'=>$vo['uid']))}">     症状详情
-                            </a>
+                            <if condition="$vo['isZheng']">
+                                <a href="{:U('User/zhengDetail',array('uid'=>$vo['uid']))}">     症状详情
+                                </a>
+                            </if>
                         </td>
                         <td>
                             <if condition="$vo['isShang']">

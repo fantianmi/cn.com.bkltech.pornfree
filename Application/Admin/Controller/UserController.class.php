@@ -35,9 +35,12 @@ class UserController extends AdminController {
         $list   = $this->lists('Member', $map);
         int_to_string($list);
         $Jingchong = D('Jingchong');
+        $ZhengzhuangUser = D('ZhengzhuangUser');
         foreach($list as &$val){
             $val['isShang'] = $Jingchong->isShang($val['uid']);
+            $val['isZheng'] = $ZhengzhuangUser->isUserZheng($val['uid']);
         }
+        unset($val);
         $this->assign('_list', $list);
         $this->meta_title = '用户信息';
         $this->display();

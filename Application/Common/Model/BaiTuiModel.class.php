@@ -55,20 +55,184 @@ class BaiTuiModel extends Model
 *@return   json 百度页面返回的结果
 */
 	public function genDataOne($uid,$title='',$description='',$uids=''){
-		Vendor('Baidu.sample.sample');
-
+		// $path = __ROOT__.'/ThinkPHP/Library/Vendor/Baidu/sample/sample.php';
+		// require_once($path);
 		$info       = D('Member')->getBaiUser($uid);
 		$user_id    = $info['user_id'];
 		$channel_id = $info['channel_id'];
 		if($info['bType'] == 'ios'){
-			$re = test_pushMessage_ios($user_id,$title,$description);
+			$re = $this->pushMessage_ios($user_id,$title,$description,$uids);
 			return $re;
 		}else if($info['bType'] == 'android'){
-			$re = test_pushMessage_android($user_id,$title,$description,$uids);
-			test_pushMessage_android_tou($user_id,$title,$description);
+//			Vendor('Baidu.sample.sample');
+			$re = $this->pushMessage_android($user_id,$title,$description,$uids);
+			$this->pushMessage_android_tou($user_id,$title,$description,$uids);
 			return $re;
 		}
 	}
+
+
+/**
+ * ios的推送
+ */
+	public function pushMessage_ios($user_id,$title,$description,$type){
+		if(!$user_id) return '';
+		$apiKey    = C('APIKEY');
+		$messages = json_encode(array(
+				'title'       => $title,
+				'description' => $description,
+        		'aps'         => array(
+        			'alert'   => $title,
+        			'sound'   => 'www.bkltech.pornfree',
+        			'badge'   => 0
+        		),
+        		"type"        => $type
+        	));
+       
+    	$data = array(
+    		'method'         =>   'push_msg',
+    		'apikey'         =>   $apiKey,
+    		'user_id'        =>   $user_id,
+    		'push_type'      =>   1,
+    		// 'channel_id'     =>   '4819124169066184786',
+    		'device_type'    =>   4,
+    		'message_type'   =>   1,
+    		'messages'       =>   $messages,
+    		'msg_keys'       =>   'testkey',
+    		'deploy_status'  =>   2,//1：开发状态 2：生产状态
+    		'timestamp'      =>   NOW_TIME + 600,
+
+    	);
+    	$re = $this->sign($data);
+    	$url = 'http://channel.api.duapp.com/rest/2.0/channel/channel';
+    	$result = $this->curlPost($re,$url);
+    	// dump($result);
+    	return $result;
+	}
+
+/**
+ * android的推送
+ */
+    public function pushMessage_android($user_id,$title,$description,$type){
+        if(!$user_id) return '';
+        $apiKey    = C('APIKEY');
+        $messages = json_encode(array(
+            'title'          => $title,
+            'description'    => $description,
+            'custom_content' => array('type'=>$type)
+        ));
+
+        $data = array(
+            'method'         =>   'push_msg',
+            'apikey'         =>   $apiKey,
+            'user_id'        =>   $user_id,
+            'push_type'      =>   1,
+            // 'channel_id'     =>   '4819124169066184786',
+            'device_type'    =>   3,
+            'message_type'   =>   1,
+            'messages'       =>   $messages,
+            'msg_keys'       =>   'testkey',
+            'deploy_status'  =>   2,
+            'timestamp'      =>   NOW_TIME + 600,
+
+        );
+        $re = $this->sign($data);
+        $url = 'http://channel.api.duapp.com/rest/2.0/channel/channel';
+        $result = $this->curlPost($re,$url);
+        // dump($result);
+        return $result;
+    }
+
+/**
+ * android的透传
+ */
+    public function pushMessage_android_tou($user_id,$title,$description,$type){
+        if(!$user_id) return '';
+        $apiKey    = C('APIKEY');
+        $messages = json_encode(array(
+            'title'          => $title,
+            'description'    => $description,
+            'custom_content' => array('type'=>$type)
+        ));
+
+        $data = array(
+            'method'         =>   'push_msg',
+            'apikey'         =>   $apiKey,
+            'user_id'        =>   $user_id,
+            'push_type'      =>   1,
+            // 'channel_id'     =>   '4819124169066184786',
+            'device_type'    =>   3, //指定为android设备
+            'message_type'   =>   0,//指定类型为透传
+            'messages'       =>   $messages,
+            'msg_keys'       =>   'testkey',
+            'deploy_status'  =>   2,
+            'timestamp'      =>   NOW_TIME + 600,
+        );
+        $re = $this->sign($data);
+        $url = 'http://channel.api.duapp.com/rest/2.0/channel/channel';
+        $result = $this->curlPost($re,$url);
+        // dump($result);
+        return $result;
+    }
+
+
+
+
+    /**
+ * 生成签名
+ */
+	public function sign($arrContent){
+		$secretKey = C('SECRET_KEY');
+    	$gather    = 'POSThttp://channel.api.duapp.com/rest/2.0/channel/channel';
+	    ksort($arrContent);
+	    foreach($arrContent as $key => $value) {
+	        $gather .= $key.'='.$value;
+	    }   
+	    $gather .= $secretKey;
+	    $sign    = md5(urlencode($gather));
+	    $arrContent['sign'] = $sign;
+	    return $arrContent;
+    }
+/**
+ * curl抓取消息
+ * @param  [type] $data [description]
+ * @param  [type] $url  [description]
+ */
+    protected function curlPost($data,$url){
+		$ch = curl_init ();
+		curl_setopt ( $ch, CURLOPT_URL, $url );
+		curl_setopt ( $ch, CURLOPT_POST, 1 );
+		curl_setopt ( $ch, CURLOPT_HEADER, 0 );
+		curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, false );
+		curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		curl_setopt ( $ch, CURLOPT_POSTFIELDS, $data );
+		curl_setopt ( $ch, CURLOPT_FILETIME, true );
+		curl_setopt ( $ch, CURLOPT_FRESH_CONNECT, false );
+		curl_setopt ( $ch, CURLOPT_SSL_VERIFYHOST, true );
+		curl_setopt ( $ch, CURLOPT_CLOSEPOLICY, CURLCLOSEPOLICY_LEAST_RECENTLY_USED );
+		curl_setopt ( $ch, CURLOPT_MAXREDIRS, 5 );
+		curl_setopt ( $ch, CURLOPT_TIMEOUT, 5184000 );
+		curl_setopt ( $ch, CURLOPT_CONNECTTIMEOUT, 120 );
+		curl_setopt ( $ch, CURLOPT_NOSIGNAL, true );
+		$return = curl_exec ( $ch );
+		curl_close ( $ch );
+		return $return;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
 *@var      推送消息给一群人 （ 一对多 推的tag标签 ）
 *@param    $tag           推送消息的标签
@@ -264,7 +428,7 @@ class BaiTuiModel extends Model
 *@param    $url           请求的地址
 *@return   json           百度页面返回的结果
 */
-	protected function curlPost($data,$url){
+	/*protected function curlPost($data,$url){
 		$ch = curl_init ();
 		curl_setopt ( $ch, CURLOPT_URL, $url );
 		curl_setopt ( $ch, CURLOPT_POST, 1 );
@@ -275,7 +439,7 @@ class BaiTuiModel extends Model
 		$return = curl_exec ( $ch );
 		curl_close ( $ch );
 		return $return;
-	}
+	}*/
 }
 
 

@@ -82,16 +82,20 @@ class IndexController extends BlogController
         if($category_id == ''){
             exit(err(100));
         }
-        $field = array('id','title','description','cover_id','link_id'=>'link','score','price','size');
+        $uid = I('uid',0,'intval');
+        $field = array('id','title','description','cover_id','link_id'=>'link','score','price','size','view','create_time');
         $where = array(
             'status'=>1,
             'category_id'=>$category_id
         );
-        $data = M('document')->field($field)->where($where)->order('update_time DESC')->page($pagenum,$pagesize)->select();
+        $data = M('document')->field($field)->where($where)->order('create_time DESC')->page($pagenum,$pagesize)->select();
         if ($data) {
+        	$model = D('DocumentBookmark');
             foreach ($data as &$v) {
-                $v['path'] = $this->getImg($v['cover_id']);
+                $v['path']   = $this->getImg($v['cover_id']);
+                $v['isbook'] = $model->checkBook($uid,$v['id']);
             }
+            unset($v);
         }else{
             $data = '';
         }
@@ -112,6 +116,39 @@ class IndexController extends BlogController
         );
         echo suc($datas);
     }
+
+/**
+ * 戒客学堂的精华接口
+ */
+    public function getEssence(){
+        $category_id = I('category_id',0,'intval');
+        $uid         = I('uid',0,'intval');
+        $pagenum     = I('pagenum',1,'intval');
+        $pagesize    = I('pagesize',10,'intval');
+        if($category_id < 0) exit( err(100, '分类id不能为空') );
+        $field = array('id','title','description','cover_id','link_id'=>'link','score','price','size','view','create_time');
+
+        $map['status']    = 1;
+        $map['isessence'] = 1;
+        $Document   = D('Document');
+        $totalcount = $Document->where($map)->count();
+        $list = $Document->field($field)->where($map)->order('update_time DESC')->page($pagenum,$pagesize)->select();
+        if($list){
+            $model = D('DocumentBookmark');
+            foreach ($list as &$v) {
+                $v['path']   = $this->getImg($v['cover_id']);
+                $v['isbook'] = $model->checkBook($uid,$v['id']);
+            }
+            unset($v);
+        }else{
+            $list = '';
+        }
+        echo sucp($pagenum,$pagesize,$totalcount,$list);
+    }
+
+
+
+
     // 配合上面的方法获取文章图片
     public function getImg($cover_id){
         $img = M('picture')->field('path')->where("id={$cover_id}")->find();

@@ -11,8 +11,20 @@ class ReportController extends AdminController
 /*首页列表*/
 	public function index(){
 		$list = $this->lists('Report');
+		foreach($list as &$v){
+			$v['posttitle']=$this->showPostTitle($v['post_id']);
+		}
 		$this->assign('_list',$list);
 		$this->display();
+	}
+	public function showPostTitle($id){
+		$map['id']=$id;
+		$post=M('forum_post')->where($map)->find();
+		if(empty($post['title'])){
+			return '该帖已删除';
+		}else{
+			return $post['title'];
+		}
 	}
 /**
  * 会员状态修改

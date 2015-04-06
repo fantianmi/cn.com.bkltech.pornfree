@@ -147,15 +147,13 @@ class ForumPostModel extends Model {
     public function getTop($id='',$limit=5,$is_top=2){
         if(empty($id)) return '';
         if($is_top == 2){
-            $map['is_top'] = array('egt',2);
+            $map['is_top']   = 2;
         }elseif ($is_top == 1) {
-            $map['is_top'] = array('egt',1);
+            $map['is_top'] = 1;
         }
-        if($is_top != 2){
-            $map['forum_id'] = $id;
-        }
+        $map['forum_id'] = $id;
         $map['status']   = 1;
-        $data = $this->where($map)->order('id DESC')->limit($limit)->select();
+        $data = $this->where($map)->limit($limit)->select();
         return $data?$data:'';
     }
 /**

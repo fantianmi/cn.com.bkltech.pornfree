@@ -328,7 +328,7 @@ class ArticleController extends AdminController {
             unset($map['category_id']);
         }
 
-        $list = $this->lists($Document,$map,'level DESC,id DESC');
+        $list = $this->lists($Document,$map,'create_time DESC,id DESC');
         int_to_string($list);
         if($map['pid']){
             // 获取上级文档

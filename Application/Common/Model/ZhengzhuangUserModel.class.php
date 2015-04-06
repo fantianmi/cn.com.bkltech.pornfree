@@ -47,7 +47,31 @@ class ZhengzhuangUserModel extends Model
 		// dump($list);
 		return $list;
 	}
-
+/**
+ * 检查用户是否有症状
+ * @param  [type]  $uid 用户id
+ * @return boolean      [description]
+ */
+	public function isUserZheng($uid){
+		if(empty($uid)) return false;
+		$result = $this->where('uid='.$uid)->find();
+		if($result) return true;
+		return false;
+	}
+/**
+ * 获取相同症状的人数（ 包括自己 ）
+ * @param  int   $zid 症状的id
+ * @return int
+ */
+	public function getCount($zid){
+		$c = S('zhengzhuang_user_'.$zid);
+		if(!empty($c)) return $c;
+		
+		$count = $this->where('zid='.$zid)->count();
+		$count = $count ? $count : 0;
+		S('zhengzhuang_user_'.$zid,$count,600);
+		return $count;
+	}
 
 }
 

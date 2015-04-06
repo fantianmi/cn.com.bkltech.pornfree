@@ -383,6 +383,8 @@ class UserController extends HomeController
                 $data['cDiwei'] = $demo;
                 $data['checkCount'] = D('Addons://Checkin/CheckInfo')->getCheckDay($uid);
                 echo json_encode(array('msg'=>'success','ret'=>0,'data'=>$data));
+                // 处理破解信息
+                D('PojieRank')->pojieTime($uid);
                 if ($Member->login($uid, $remember == 'on')) { //登录用户
                     //TODO:跳转到登录前页面
 

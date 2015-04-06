@@ -7,14 +7,14 @@ class ZhengzhuangController extends Controller{
 获取后台的常见症状(如果传入uid还包括用户的症状)
 */
     public function getZheng(){
-    	$uid = I('uid');
+        $uid = I('uid');
         $sql = "select z.id zid,z.uid,z.name,z.create_time from thinkox_zhengzhuang z left join (select *,count(*) uc from thinkox_zhengzhuang_user group by zid) u ON z.id=u.zid where z.type=0 and z.status=1 order by u.uc DESC";
         $result = M()->query($sql);
         foreach ($result as &$v) {
             $v['type'] = "sys";
         }
-    	if(!empty($uid)){
-    		$user = M('zhengzhuang_user')->field('zid,uid,create_time')->where("uid={$uid}")->select();
+        if(!empty($uid)){
+            $user = M('zhengzhuang_user')->field('zid,uid,create_time')->where("uid={$uid}")->select();
             // $user = M('zhengzhuang')->field($field)->where("uid={$uid} and status=1")->select();
             if($user){
                 foreach ($user as &$v) {
@@ -26,7 +26,7 @@ class ZhengzhuangController extends Controller{
             }
             $data = array_merge($result,$user);
             exit(suc($data));
-    	}
+        }
         exit(suc($result));
     }
 
@@ -120,9 +120,18 @@ class ZhengzhuangController extends Controller{
         if (empty($uid) || empty($name) || $uid == 1) {
             exit( $this->err(100));
         }
-        $result = M('zhengzhuang')->where("name='{$name}'")->find();
+        $result = M('zhengzhuang')->field('id zid,name')->where("name='{$name}'")->find();
         if($result){
-            // $zid = $result['id'];
+            // 有症状就直接不新增症状
+            $datas = array('uid'=>$uid,'zid'=>$result['zid'],'create_time'=>NOW_TIME);
+            // 判断用户是否有此症状，有就不再添加
+            $map['uid'] = $uid;
+            $map['zid'] = $result['zid'];
+            if(M('ZhengzhuangUser')->where($map)->find()) exit( err(400) );
+
+            if(M('ZhengzhuangUser')->add($datas)){
+                exit( suc($result) );
+            }
             exit( err(400) );
         }else{
             $data = array(
@@ -133,6 +142,8 @@ class ZhengzhuangController extends Controller{
                 'status'=>1
             );
             $zid = M('zhengzhuang')->add($data);
+            $datas = array('uid'=>$uid,'zid'=>$zid,'create_time'=>NOW_TIME);
+            M('ZhengzhuangUser')->add($datas);
         }
 
         $zheng = M('zhengzhuang')->field('id zid,name')->where("id={$zid}")->find();
@@ -165,12 +176,14 @@ class ZhengzhuangController extends Controller{
             if(M('zhengzhuang_user')->addAll($datas)){
                 $strZid = implode(',',$zid);
                 $zheng  = M('zhengzhuang')->field('id zid,name')->where("id in({$strZid})")->select();
+                $ZhengzhuangUser = D('ZhengzhuangUser');
                 foreach ($zheng as &$val) {
                     /*获取症状的创建世界*/
                     $val['create_time'] = M('zhengzhuang_user')->where("zid={$val['zid']} and uid={$uid}")->getField('create_time');
-
-                    $val['uid'] = $uid;
+                    $val['usercount'] = $ZhengzhuangUser->getCount($val['zid']);
+                    $val['uid']   = $uid;
                 }
+                unset($val);
                 echo $this->suc($zheng);
             }else{
                 // echo $this->err();
@@ -180,18 +193,18 @@ class ZhengzhuangController extends Controller{
 /**
 用户删除症状处理
 */
-	public function delZheng(){
-		$zid = I('zid');
+    public function delZheng(){
+        $zid = I('zid');
         $uid = I('uid');
-		if(empty($zid) || empty($uid)){
-			exit( $this->err(100));
-		}
-		if(M('zhengzhuang_user')->where("zid={$zid} and uid={$uid}")->delete()){
-			echo $this->suc();
-		}else{
-			echo $this->err();
-		}
-	}
+        if(empty($zid) || empty($uid)){
+            exit( $this->err(100));
+        }
+        if(M('zhengzhuang_user')->where("zid={$zid} and uid={$uid}")->delete()){
+            echo $this->suc();
+        }else{
+            echo $this->err();
+        }
+    }
 /**
 添加精虫上脑
 */
@@ -257,15 +270,15 @@ class ZhengzhuangController extends Controller{
         );
         echo $this->suc($data);
     }
-	/**
-	*向数据表插入（ 为了app统计图 ）
-	*/
+    /**
+    *向数据表插入（ 为了app统计图 ）
+    */
     public function addZhengScoreRecord($uid,$zid,$score,$create_time){
-    	if($create_time!=''&&$create_time!=null){
-        	$first  = $create_time;
-    	}else{
-        	$first  = strtotime(date('Ymd',NOW_TIME));
-    	}
+        if($create_time!=''&&$create_time!=null){
+            $first  = $create_time;
+        }else{
+            $first  = strtotime(date('Ymd',NOW_TIME));
+        }
         $last   = $first + 24*3600;
         $map['create_time'] = array('between',"{$first},{$last}");
         $map['uid']         = $uid;
@@ -291,28 +304,28 @@ class ZhengzhuangController extends Controller{
      * if昨天有打分则不用操作，则进行打分
      */
     public function checkIsScore($uid){
-    	$list=M('zhengzhuang_user')->where("uid={$uid}")->select();
-    	$checkDate=strtotime(date('Ymd',NOW_TIME))-86400;
-    	foreach($list as $vals){
-    		$map['zid']=$vals['zid'];
-    		$map['uid']=$uid;
-    		$zhengzhuang_record=M('zhengzhuang_record')->where($map)->order('create_time desc')->limit(1)->find();
-    		$ctime=$zhengzhuang_record['create_time'];
-    		if($ctime==''||$ctime==null){
-    			$this->addZhengScoreRecord($uid,$vals['zid'],0);
-    		}else if($ctime<$checkDate){
-    			$this->autoInsertScore($uid,$vals['zid'],$ctime,$zhengzhuang_record['score']);
-    		}
-    	}
+        $list=M('zhengzhuang_user')->where("uid={$uid}")->select();
+        $checkDate=strtotime(date('Ymd',NOW_TIME))-86400;
+        foreach($list as $vals){
+            $map['zid']=$vals['zid'];
+            $map['uid']=$uid;
+            $zhengzhuang_record=M('zhengzhuang_record')->where($map)->order('create_time desc')->limit(1)->find();
+            $ctime=$zhengzhuang_record['create_time'];
+            if($ctime==''||$ctime==null){
+                $this->addZhengScoreRecord($uid,$vals['zid'],0);
+            }else if($ctime<$checkDate){
+                $this->autoInsertScore($uid,$vals['zid'],$ctime,$zhengzhuang_record['score']);
+            }
+        }
     }
     /**
      * 自动插入分数
      */
     public function autoInsertScore($uid,$zid,$start_time,$recent_score){
-    	while($start_time<=strtotime(date('Ymd',NOW_TIME))-86400){
-    		$this->addZhengScoreRecord($uid,$zid,$recent_score,$start_time);
-    		$start_time+=86400;
-    	}
+        while($start_time<=strtotime(date('Ymd',NOW_TIME))-86400){
+            $this->addZhengScoreRecord($uid,$zid,$recent_score,$start_time);
+            $start_time+=86400;
+        }
     }
 
 // 给自己的症状评分
@@ -332,7 +345,7 @@ class ZhengzhuangController extends Controller{
             echo $this->err();
         }
     }
-	// 症状测评月统计图的评分
+    // 症状测评月统计图的评分
     public function getScore(){
         $uid   = I('uid');
         $limit = I('size',10);
@@ -524,7 +537,7 @@ class ZhengzhuangController extends Controller{
         }
     }
 /*获取食补判断今天是否吃过*/
-    public function getShi($category_id,$uid,$pagenum=1,$pagesize=10){
+    public function getShi($category_id,$uid,$pagenum=1,$pagesize=10,$types=1){
         /*$category_id = I('category_id');
         $pagenum     = I('pagenum',1);
         $pagesize    = I('pagesize',10);
@@ -535,10 +548,12 @@ class ZhengzhuangController extends Controller{
         $document = M('Document');
         /*判断是否是食补分类的id*/
 
-
-        $count = $document->where("category_id={$category_id} and status=1")->count();
+        $map['category_id'] = $category_id;
+        $map['status']      = 1;
+        $map['types']       = $types;
+        $count = $document->where($map)->count();
         
-        $list = $document->field($field)->where("category_id={$category_id} and status=1")->order('update_time DESC')->page($pagenum,$pagesize)->select();
+        $list = $document->field($field)->where($map)->order('update_time DESC')->page($pagenum,$pagesize)->select();
         $sModel = D('ShibuUser');
         foreach ($list as &$v) {
             $v['count'] = $sModel->getCount($v['id']);

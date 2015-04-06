@@ -78,7 +78,7 @@ class ConfigController extends BaseController
         
         //TODO tox 清空缓存
         if ($rs_member !== false) {
-            $datas = M('ucenter_member')->field($field)->where("id={$uid}")->find();
+            $datas = M('ucenter_member')->where("id={$uid}")->find();
             $users = $this->getUser($uid);
             $datas['nickname'] = $users['nickname'];
             $datas['age'] = $users['age'];
@@ -95,8 +95,13 @@ class ConfigController extends BaseController
             $where = $score['score'];
             $count = M('member')->where("score > {$where}")->count();
             $count = $count+1;
+
+            $uinfo = query_user(array('avatar32','title'),$uid);
             $datas['paiming'] = $count;
-            $datas['avatar']  = "/Uploads".$this->getAvatar($uid);//获取用户的头像
+            $datas['avatar']  = $uinfo['avatar32'];//获取用户的头像
+            $datas['uid']     = $datas['id'];
+            $datas['diwei']   = $uinfo['title'];
+            unset($datas['id']);
             echo suc($datas);
         } else {
             echo err();

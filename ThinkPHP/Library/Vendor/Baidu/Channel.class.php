@@ -1046,8 +1046,6 @@ class Channel extends BaeBase
 		$http_method = 'POST';
 		$opt[self::SIGN] = $this->_genSign($http_method, $url, $opt);
 
-		/*echo "<pre>";
-		var_dump($opt);*/
 		foreach ($opt as $k => $v) {
 			$k = urlencode($k);
 			$v = urlencode($v);
